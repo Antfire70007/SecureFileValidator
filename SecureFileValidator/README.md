@@ -1,103 +1,85 @@
 # SecureFileValidator
 
-跨 .NET Framework 4.7 與 .NET 8 的檔案安全驗證工具，支援常見格式（Word、Excel、MP4 等）的檔案簽名（magic number）比對，防止副檔名偽裝攻擊。
-
-## 功能特色
-
-- ✅ 支援 Office 格式 (DOCX, XLSX)
-- ✅ 支援影音檔 (MP4, AVI, PNG, JPG 等)
-- ✅ 檢查 ZIP 結構是否合法（如 Office OpenXML）
-- ✅ 提供 ActionFilter 與 DataAnnotation 屬性，可於 ASP.NET MVC / Core 中驗證上傳檔案
-- ✅ 可驗證單一檔案或整批上傳檔案
-- ✅ 完整單元測試與多框架支援
+📦 強型別檔案簽章驗證器，支援 .NET 8 / .NET Framework 4.7  
+支援 DataAnnotation、Action Filter 驗證方式，可套用於 ASP.NET Core / MVC 控制器與表單檢查。
 
 ---
 
-## 安裝方式
+## ✅ 支援格式（依 magic number 檢查）
 
-### 套件參考（NuGet）
-
-若使用 `.NET 8`：
-
-```xml
-<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-```
-
-若使用 `.NET Framework 4.7`：
-
-```xml
-<PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.9" />
-<PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
-```
+- `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`, `.tif`
+- `.pdf`, `.docx`, `.xlsx`, `.zip`, `.rar`, `.7z`
+- `.mp3`, `.mp4`, `.avi`, `.webp`, `.exe`
 
 ---
 
-## 使用方式
+## 🔐 驗證方式
 
-### 1️⃣ 驗證副檔名與檔案內容是否符合
-
-```csharp
-using (var stream = file.OpenReadStream())
-{
-    bool valid = FileSignatureValidator.Validate(stream, file.FileName);
-}
-```
-
-也可加入副檔名白名單：
-
-```csharp
-FileSignatureValidator.Validate(stream, file.FileName, new[] { ".docx", ".xlsx" });
-```
-
----
-
-### 2️⃣ 套用 ActionFilterAttribute 進行 API 驗證
-
-#### ✅ 指定檔案欄位名稱：
-
-```csharp
-[ValidateFileSignature("file")]
-public IActionResult Upload(IFormFile file)
-```
-
-#### ✅ 自動檢查所有上傳檔案（不指定參數名）：
-
-```csharp
-[ValidateFileSignature]
-public IActionResult UploadAll()
-```
-
----
-
-### 3️⃣ 使用 DataAnnotation 屬性驗證模型檔案欄位
+### 1. DataAnnotation 驗證（ASP.NET Core）
 
 ```csharp
 public class UploadModel
 {
-    [ValidFileSignature(AllowedExtensions = new[] { ".docx", ".xlsx" }, ErrorMessage = "請上傳正確的檔案類型")]
+    [ValidateFileSignature(AllowedExtensions = new[] { ".docx", ".xlsx" })]
     public IFormFile File { get; set; }
 }
 ```
 
+> 驗證失敗會寫入 ModelState 錯誤，可搭配 `TryValidateModel()` 或 `TryUpdateModelAsync()` 使用。
+
 ---
 
-## 單元測試
+### 2. Action Filter 驗證（ASP.NET Core）
 
-範例測試已涵蓋：
+```csharp
+[ValidateFileSignature(FileParameterName = "file")]
+public IActionResult Upload(IFormFile file) { ... }
+```
 
-- ✅ 正常的副檔名與簽名比對
-- ✅ 限制副檔名過濾
-- ✅ 多檔案同時上傳時，自動驗證所有檔案
+或驗證所有表單中檔案：
 
-執行方式：
-
-```bash
-dotnet test
+```csharp
+[ValidateFileSignature]
+public IActionResult Upload() { ... }
 ```
 
 ---
 
-## 授權 License
+### 3. MVC (.NET Framework)
 
-此專案採用 MIT 授權，請自由使用並保留原始出處。
+```csharp
+[ValidateFileSignature(FileParameterName = "file", AllowedExtensions = new[] { ".docx" })]
+public ActionResult Upload(HttpPostedFileBase file)
+```
+
+---
+
+## 🧪 單元測試
+
+請見 `SecureFileValidator.Tests` 中範例，包括：
+
+- `.png` 冒充 `.docx` 驗證失敗
+- 合法 `.docx` 驗證成功
+- 驗證失敗時 `ModelState` 錯誤訊息檢查
+
+---
+
+## 🛠 安裝套件
+
+若手動引用專案，請加入：
+
+```xml
+<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+  <PackageReference Include="Microsoft.AspNetCore.App" />
+</ItemGroup>
+
+<ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+  <Reference Include="System.Web" />
+</ItemGroup>
+```
+
+---
+
+## 📄 授權
+
+MIT License
