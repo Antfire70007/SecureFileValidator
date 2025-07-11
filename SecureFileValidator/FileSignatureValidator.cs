@@ -16,6 +16,7 @@ namespace SecureFileValidator
 
             return Validate(stream, fileName);
         }
+
         public static bool Validate(Stream stream, string fileName)
         {
             string ext = Path.GetExtension(fileName).ToLowerInvariant();
@@ -37,9 +38,9 @@ namespace SecureFileValidator
                         return false;
                     }
 
-                    // 直接副檔名匹配
-                    if (kv.Value.Contains(ext))
-                        return true;
+                    // ✅ 檢查是否該 magic number 對應的副檔名包含此副檔名
+                    if (!kv.Value.Contains(ext))
+                        return false;
 
                     // DOCX / XLSX 檢查內部結構
                     if (ext == ".docx" || ext == ".xlsx")
@@ -59,13 +60,15 @@ namespace SecureFileValidator
                         {
                             return false;
                         }
+
+                        return false;
                     }
 
-                    //return true;
+                    return true;
                 }
             }
 
-            // MP4 特例：檢查 ftyp
+            // MP4 特例：檢查 ftyp 並確認副檔名
             if (buffer.Length >= 12 && ext == ".mp4")
             {
                 string ftyp = Encoding.ASCII.GetString(buffer, 4, 4);
