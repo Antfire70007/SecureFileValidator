@@ -6,7 +6,7 @@
 	  <!-- ★ 加上這行！ -->
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <PackageId>SecureFileValidator</PackageId>
-	  <Version>1.0.5</Version>
+	  <Version>1.0.6</Version>
 	  <Authors>Antfire</Authors>
 	  <Company>Antfire</Company>
 	  <Description>跨 .NET Framework 與 .NET 8 的檔案簽名驗證函式庫，支援多種檔案格式，並提供 ASP.NET Controller 範圍內使用的驗證 Attribute。</Description>
