@@ -63,8 +63,7 @@ namespace SecureFileValidator
 
                         return false;
                     }
-
-                    //return false;
+                    return false;
                 }
             }
 
