@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace SecureFileValidator.Attributes
 {
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method)]
     public class ValidFileSignatureAttribute : ValidationAttribute
     {
         public string[] AllowedExtensions { get; set; } = Array.Empty<string>();
