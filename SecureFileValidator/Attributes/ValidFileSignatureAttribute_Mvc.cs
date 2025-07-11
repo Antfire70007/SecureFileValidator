@@ -6,7 +6,7 @@ using System.Web;
 
 namespace SecureFileValidator.Attributes
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Property )]
     public class ValidFileSignatureAttribute : ValidationAttribute
     {
         public string[] AllowedExtensions { get; set; } = Array.Empty<string>();

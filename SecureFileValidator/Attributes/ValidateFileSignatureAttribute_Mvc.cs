@@ -1,53 +1,51 @@
 #if NETFRAMEWORK
 using System;
+using System.IO;
 using System.Web;
 using System.Web.Mvc;
-using System.IO;
 
 namespace SecureFileValidator.Attributes
 {
-    public class ValidateFileSignatureAttribute : FilterAttribute, IActionFilter
+    [AttributeUsage(AttributeTargets.Method)]
+    public class ValidateFileSignatureAttribute : ActionFilterAttribute
     {
-        public string? FileParameterName { get; }
+        public string FileParameterName { get; set; }
 
-        public ValidateFileSignatureAttribute(string? fileParameterName = null)
-        {
-            FileParameterName = fileParameterName;
-        }
+        public string[] AllowedExtensions { get; set; }
 
-        public void OnActionExecuting(ActionExecutingContext filterContext)
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
+            var request = filterContext.HttpContext.Request;
+
             if (!string.IsNullOrEmpty(FileParameterName))
             {
-                var file = filterContext.HttpContext.Request.Files[FileParameterName];
-                if (file == null)
-                    return;
-
-                using (var stream = file.InputStream)
+                var file = request.Files[FileParameterName];
+                if (file != null && !IsValidFile(file))
                 {
-                    if (!FileSignatureValidator.Validate(stream, file.FileName))
-                        filterContext.Result = new HttpStatusCodeResult(400, "檔案內容與副檔名不符");
+                    filterContext.Controller.ViewData.ModelState.AddModelError(FileParameterName, "檔案內容不符合副檔名");
                 }
             }
             else
             {
-                var files = filterContext.HttpContext.Request.Files;
-                for (int i = 0; i < files.Count; i++)
+                foreach (string key in request.Files)
                 {
-                    var file = files[i];
-                    using (var stream = file.InputStream)
+                    var file = request.Files[key];
+                    if (file != null && !IsValidFile(file))
                     {
-                        if (!FileSignatureValidator.Validate(stream, file.FileName))
-                        {
-                            filterContext.Result = new HttpStatusCodeResult(400, $"檔案 {file.FileName} 的內容與副檔名不符");
-                            break;
-                        }
+                        filterContext.Controller.ViewData.ModelState.AddModelError(key, "檔案內容不符合副檔名");
+                        break;
                     }
                 }
             }
         }
 
-        public void OnActionExecuted(ActionExecutedContext filterContext) { }
+        private bool IsValidFile(HttpPostedFileBase file)
+        {
+            using (var stream = file.InputStream)
+            {
+                return FileSignatureValidator.Validate(stream, file.FileName, AllowedExtensions);
+            }
+        }
     }
 }
 #endif

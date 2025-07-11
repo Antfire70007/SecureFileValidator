@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace SecureFileValidator.Attributes
 {
+    [AttributeUsage(AttributeTargets.Method)]
     public class ValidateFileSignatureAttribute : Attribute, IActionFilter
     {
         public string? FileParameterName { get; }
@@ -24,7 +25,8 @@ namespace SecureFileValidator.Attributes
                 {
                     using var stream = formFile.OpenReadStream();
                     if (!FileSignatureValidator.Validate(stream, formFile.FileName))
-                        context.Result = new BadRequestObjectResult("檔案內容不符合副檔名");
+                        context.ModelState.AddModelError(FileParameterName, "檔案內容不符合副檔名");
+
                 }
             }
             else
@@ -36,7 +38,7 @@ namespace SecureFileValidator.Attributes
                     using var stream = formFile.OpenReadStream();
                     if (!FileSignatureValidator.Validate(stream, formFile.FileName))
                     {
-                        context.Result = new BadRequestObjectResult($"檔案 {formFile.FileName} 的內容與副檔名不符");
+                        context.ModelState.AddModelError(formFile.FileName, "檔案內容不符合副檔名");
                         break;
                     }
                 }
