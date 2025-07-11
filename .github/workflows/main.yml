@@ -3,7 +3,7 @@ name: Publish NuGet Package
 on:
   push:
     tags:
-      - 'v*.*.*'  # 當 push 的 tag 符合 v1.0.0 時才會觸發
+      - 'v*.*.*'  # 當 push 的 tag 符合 v1.0.0 時才會觸發 
 
 jobs:
   build-and-publish:

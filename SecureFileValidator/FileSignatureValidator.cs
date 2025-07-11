@@ -8,6 +8,14 @@ namespace SecureFileValidator
 {
     public static class FileSignatureValidator
     {
+        public static bool Validate(Stream stream, string fileName, string[]? allowedExtensions)
+        {
+            var ext = Path.GetExtension(fileName)?.ToLowerInvariant();
+            if (allowedExtensions != null && !allowedExtensions.Contains(ext))
+                return false;
+
+            return Validate(stream, fileName);
+        }
         public static bool Validate(Stream stream, string fileName)
         {
             string ext = Path.GetExtension(fileName).ToLowerInvariant();
