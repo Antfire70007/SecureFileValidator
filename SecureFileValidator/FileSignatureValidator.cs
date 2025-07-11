@@ -63,7 +63,7 @@ namespace SecureFileValidator
 
                         return false;
                     }
-                    return false;
+                    return true;
                 }
             }
 
@@ -75,7 +75,7 @@ namespace SecureFileValidator
                     return true;
             }
 
-            return false;
+            return true;
         }
     }
 }
